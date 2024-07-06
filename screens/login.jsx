@@ -34,10 +34,11 @@ const Login = () => {
                 return;
             }
 
-            // Check the value of the 'oops' attribute and navigate accordingly
+            // Store the user's USN in AsyncStorage
+            await AsyncStorage.setItem('userUSN', usn);
+            
+            // Navigate to Home or Oops screen based on user attribute
             if (user.oops) {
-                // Store the user's USN in AsyncStorage
-                await AsyncStorage.setItem('userUSN', usn);
                 navigation.navigate('Home');
             } else {
                 navigation.navigate('Oops');

@@ -5,6 +5,9 @@ import HomeScreen from './screens/home';
 import SignUpScreen from './screens/signup';
 import LoginScreen from './screens/login';
 import Oops from './screens/oops'
+import Admin from './screens/admin';
+import Event from './screens/event';
+import Achievement from './screens/achievement';
 import { StatusBar } from 'react-native';
 
 const Stack = createStackNavigator();
@@ -22,8 +25,9 @@ function MainStack() {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Oops" component={Oops} />
-
-
+      <Stack.Screen name="Admin" component={Admin} />
+        <Stack.Screen name="Event" component={Event} />
+        <Stack.Screen name="Achievement" component={Achievement} />
     </Stack.Navigator>
   );
 }

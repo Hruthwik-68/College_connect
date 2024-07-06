@@ -1,0 +1,84 @@
+import React, { useState } from 'react';
+import { Button, Image, View, StyleSheet, Alert } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { Client, Storage } from 'appwrite'; // Import Appwrite SDK
+
+const client = new Client()
+  .setEndpoint('https://cloud.appwrite.io/v1') // Your Appwrite API Endpoint
+  .setProject('<PROJECT_ID>'); // Your Appwrite Project ID
+
+const storage = new Storage(client);
+
+export default function ImagePickerExample() {
+  const [image, setImage] = useState(null);
+  const [fileId, setFileId] = useState(null);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      try {
+        // Upload image to Appwrite bucket
+        const file = new File([result.assets[0].uri], result.assets[0].fileName);
+        const response = await storage.createFile('<BUCKET_ID>', file); // Replace <BUCKET_ID> with your Appwrite bucket ID
+        const fileId = response.$id; // Get uploaded file ID
+        console.log('Uploaded file ID:', fileId);
+
+        // Store fileId in state
+        setFileId(fileId);
+
+        // Set image URI for display
+        setImage(result.assets[0].uri);
+      } catch (error) {
+        console.error('Error uploading image:', error);
+      }
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!fileId) {
+      Alert.alert('No Image Uploaded', 'Please upload an image first.');
+      return;
+    }
+
+    try {
+      // Store fileId in your event collection (replace with your logic)
+      const document = await client.database.createDocument('<DATABASE_ID>', '<COLLECTION_ID>', {
+        photoId: fileId,
+        // Add more fields if necessary
+      });
+      console.log('Stored in database:', document);
+      Alert.alert('Success', 'Image information stored successfully.');
+    } catch (error) {
+      console.error('Error storing in database:', error);
+      Alert.alert('Error', 'Failed to store image information.');
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Button title="Pick an image from camera roll" onPress={pickImage} />
+      {image && <Image source={{ uri: image }} style={styles.image} />}
+      <Button title="Submit" onPress={handleSubmit} disabled={!image} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  image: {
+    width: 200,
+    height: 200,
+    marginVertical: 20,
+  },
+});
